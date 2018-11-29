@@ -1,0 +1,16 @@
+<table style="height: 87px; margin-left: auto; margin-right: auto; width: 748px;">
+<tbody>
+<tr style="height: 35px;">
+<td style="width: 63px; height: 35px;" rowspan="2"><strong>%LISTING_REASON%</strong></td>
+<td style="width: 425px; height: 35px;"><strong>%LISTING_TITLE%</strong></td>
+<td style="width: 245px; height: 35px;"><a title="%LISTING_TITLE%" href="%LISTING_LINK%" target="_blank" rel="noopener">LINK</a></td>
+<td style="width: 245px; height: 35px; text-align: right;"><strong>%LISTING_PRICE%</strong></td>
+</tr>
+<tr style="height: 102px;">
+<td style="width: 425px; height: 102px;"><img src="%LISTING_IMAGE%" alt="" width="125" height="90" /></td>
+<td style="width: 245px; height: 102px;">ID: %LISTING_ID%</td>
+<td style="width: 245px; height: 102px;">&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p> 
