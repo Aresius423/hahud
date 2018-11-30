@@ -136,6 +136,7 @@ for query in queries:
 		
 	print("... done.")
 	
+	newIDs = list(map(lambda newresult: newresult.id, results))	
 	changes = []
 	
 	if not os.path.isfile(dirpath+"/data.db"):
@@ -145,7 +146,7 @@ for query in queries:
 		for currentCar in results:
 			oldres = olddb.execute("SELECT * from cars WHERE id=?", [currentCar.id]).fetchone()
 			if oldres is not None:
-				oldcar = car(oldres[0],oldres[1],oldres[2],oldres[3],oldres[4])
+				oldcar = car(*oldres)
 				if oldcar != currentCar:
 					changes.append(change(currentCar, "changed", currentCar.diffFromOld(oldcar)))
 			else:
@@ -153,7 +154,6 @@ for query in queries:
 				
 		oldCarData = olddb.execute("SELECT * from cars").fetchall()
 		oldCars = list(map(lambda tuple: car(*tuple), oldCarData))
-		newIDs = list(map(lambda newresult: newresult.id, results))
 		for oldCar in oldCars:
 			if oldCar.id not in newIDs:
 				changes.append(change(oldCar, "deleted", "deleted"))
@@ -165,17 +165,30 @@ for query in queries:
 		templateFile = open(os.getcwd() + "/templates/delta_template")
 		listTemplateFile = open(os.getcwd() + "/templates/listing_template")
 		listTemplate = listTemplateFile.read()
-		deltaFile = open(dirpath + "/" + str(time.time()) + ".html", "w+", encoding='utf-8')
+		dfilename = dirpath + "/" + str(time.time()) + ".html"
+		deltaFile = open(dfilename, "w+", encoding='utf-8')
+		fullDeltaFile = open(dfilename[:-5] + ".full.html", "w+", encoding='utf-8')
 		
 		for line in templateFile:
 			if not line.startswith("%DELTA%"):
+				fullDeltaFile.write(line)
 				deltaFile.write(line)
 			else:
 				for thisChange in changes:
-					deltaFile.write(thisChange.toListItem(listTemplate))
+					cli = thisChange.toListItem(listTemplate)
+					deltaFile.write(cli)
+					fullDeltaFile.write(cli)
+					
+				resultsAsChanges = list(map(lambda simpleResult: change(simpleResult, "", ""), results))
+				changeIDs = list(map(lambda alreadyWrittenChange: alreadyWrittenChange.car.id, changes))
+				filteredResults = filter(lambda r: r.car.id not in changeIDs, resultsAsChanges)
+				
+				for fres in filteredResults:
+					fullDeltaFile.write(fres.toListItem(listTemplate))
+				
 					
 		templateFile.close()
-		deltaFile.close()
+		fullDeltaFile.close()
 	
 	newdb.close()
 	
@@ -198,9 +211,11 @@ for line in indexTemplateFile:
 		for dir in dirs:
 			indexFile.write("<li>" + dir.split("data_")[-1][:-1] + "\n<ul>\n")
 			
-			htmls = glob(dir + "*.html")[::-1]			
+			allhtmls = glob(dir + "*.html")[::-1]
+			htmls = filter(lambda h: not h.endswith("full.html"), allhtmls)
+			
 			nonAbsolute = list(map(lambda abs: "/".join(abs.split('\\')[-2:]), htmls))
-			links = list(map(lambda pth: "<li><a href=\""+pth+"\" target=\"main\">" + epoch2timestamp(float(pth.split("/")[-1][:-5])) + "</a>\n", nonAbsolute)) 
+			links = list(map(lambda pth: "<li><a href=\""+pth+"\" target=\"main\">" + epoch2timestamp(float(pth.split("/")[-1][:-5])) + "</a> <a href =\"" + pth[:-5] + ".full.html\" target=\"main\">Δ</a>\n", nonAbsolute)) 
 			
 			for link in links:
 				indexFile.write(link)
