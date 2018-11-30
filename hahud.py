@@ -5,7 +5,7 @@ import os
 import time
 from datetime import datetime
 
-from selenium import webdriver
+import urllib
 
 from glob import glob
 
@@ -79,8 +79,30 @@ def page(num, base):
 def epoch2timestamp(ts):
 	return datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 	
+#non-absolute path is used for html generation, so changing this only would be unwise
+cachedir = os.getcwd() + "/cache/"
+	
+#this really should have its own module
+def loadToCache(imgurl):
+	if imgurl == "NotFound":
+		return "../resources/notfound.png"
+	extension = imgurl.split(".")[-1]
+	hash = hashlib.md5(imgurl.encode('utf-8')).hexdigest()
+	cacheFile = cachedir + hash + "." + extension
+	
+	if not os.path.isfile(cacheFile):
+		try:
+			urllib.request.urlretrieve(imgurl, cacheFile)
+		except:
+			raise
+			return "../resources/notfound.png"
+			
+	return "../cache/" + hash + "." + extension
 	
 header = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:32.0) Gecko/20100101 Firefox/32.0',}
+
+if not os.path.exists(cachedir):
+		os.makedirs(cachedir)
 
 for query in queries:
 	hash = hashlib.md5(query.url.encode('utf-8')).hexdigest()[:6]
@@ -91,7 +113,11 @@ for query in queries:
 	
 	initReq = requests.get(query.url, headers=header)
 	initTree = html.fromstring(initReq.content)
-	num_of_pages = int(initTree.xpath('//link[@rel="last"]/@href')[0].split("page")[1])
+	
+	try:
+		num_of_pages = int(initTree.xpath('//link[@rel="last"]/@href')[0].split("page")[1])
+	except IndexError:
+		num_of_pages = 1
 	
 	if os.path.isfile(dirpath+"/newdata.db"):
 		os.remove(dirpath+"/newdata.db")
@@ -125,8 +151,9 @@ for query in queries:
 			try:
 				img = kepsor.find('.//img[@class="img-responsive lazy"]').get('data-lazyurl')
 			except AttributeError:
-				img = ""
+				img = "NotFound"
 				
+			img = loadToCache(img)
 			price = adatsor.find('.//div[@class="vetelar"]').text
 			id = listing.find('.//*[@data-hirkod]').get('data-hirkod')
 			databoxes = info.findall('.//span')

@@ -7,7 +7,7 @@
 <td style="width: 325.5px; height: 35px; text-align: right;"><strong>%LISTING_PRICE%</strong></td>
 </tr>
 <tr style="height: 144px;">
-<td style="width: 546px; height: 144px; text-align: center;"><img src="%LISTING_IMAGE%" alt="" width="125" height="90" /></td>
+<td style="width: 546px; height: 144px; text-align: center;"><img src="%LISTING_IMAGE%" alt="" width="118" height="88" /></td>
 <td style="width: 475.5px; height: 144px;" colspan="2">ID: %LISTING_ID%&nbsp;</td>
 </tr>
 <tr style="height: 24px;">
