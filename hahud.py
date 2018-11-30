@@ -150,6 +150,14 @@ for query in queries:
 					changes.append(change(currentCar, "changed", currentCar.diffFromOld(oldcar)))
 			else:
 				changes.append(change(currentCar, "new", ""))
+				
+		oldCarData = olddb.execute("SELECT * from cars").fetchall()
+		oldCars = list(map(lambda tuple: car(*tuple), oldCarData))
+		newIDs = list(map(lambda newresult: newresult.id, results))
+		for oldCar in oldCars:
+			if oldCar.id not in newIDs:
+				changes.append(change(oldCar, "deleted", "deleted"))
+		
 		olddb.close()
 			
 	
@@ -190,7 +198,7 @@ for line in indexTemplateFile:
 		for dir in dirs:
 			indexFile.write("<li>" + dir.split("data_")[-1][:-1] + "\n<ul>\n")
 			
-			htmls = glob(dir + "*.html")			
+			htmls = glob(dir + "*.html")[::-1]			
 			nonAbsolute = list(map(lambda abs: "/".join(abs.split('\\')[-2:]), htmls))
 			links = list(map(lambda pth: "<li><a href=\""+pth+"\" target=\"main\">" + epoch2timestamp(float(pth.split("/")[-1][:-5])) + "</a>\n", nonAbsolute)) 
 			
