@@ -40,22 +40,24 @@ class change:
 		filled = filled.replace("%LISTING_TITLE%", self.car.title)
 		filled = filled.replace("%LISTING_IMAGE%", self.car.img)
 		filled = filled.replace("%DETAILED_REASON%", self.reason)
+		filled = filled.replace("%LISTING_DATA%", self.car.data)
 		return filled
 
 class car:
-	def __init__(self, id, title, url, price, img):
+	def __init__(self, id, title, url, price, img, data):
 		self.id = id
 		self.title = title
 		self.url = url
 		self.price = price.replace('\xa0', '&nbsp;')
 		self.img = img
+		self.data = data
 		
 	def __str__(self):
 		return self.id + "\n" + self.title + "\n" + self.price + "\n___________"
 	
 	def __eq__(self, other):
 		if isinstance(other, car):
-			return self.id == other.id and self.title == other.title and self.url == other.url and self.price == other.price and self.img == other.img
+			return self.id == other.id and self.title == other.title and self.url == other.url and self.price == other.price and self.img == other.img and self.data == other.data
 		return False
 		
 	def diffFromOld(self, other):
@@ -66,6 +68,8 @@ class car:
 			difference += "price changed from " + str(other.price) + "<br>\n"
 		if self.img != other.img:
 			difference += "image changed<br>\n"
+		if self.data != other.data:
+			difference += "data changed<br>\n"
 		return difference
 			
 		
@@ -77,9 +81,6 @@ def epoch2timestamp(ts):
 	
 	
 header = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:32.0) Gecko/20100101 Firefox/32.0',}
-
-car1 = car('a','b','c','d','e')
-car2 = car('a','b','c','d','e')
 
 for query in queries:
 	hash = hashlib.md5(query.url.encode('utf-8')).hexdigest()[:6]
@@ -98,7 +99,7 @@ for query in queries:
 	newdb = sqlite3.connect(dirpath+"/newdata.db")
 	
 	try:
-		newdb.execute("CREATE TABLE cars(id TEXT, title TEXT, url TEXT, price TEXT, img TEXT)")
+		newdb.execute("CREATE TABLE cars(id TEXT, title TEXT, url TEXT, price TEXT, img TEXT, cdata TEXT)")
 	except sqlite3.OperationalError:
 		print(newdb.execute("SELECT * from cars").fetchall())
 		newdb.close()
@@ -115,6 +116,8 @@ for query in queries:
 		for listing in listings:
 			kepsor = listing.find('.//div[@class="talalatisor-kep"]')
 			adatsor = listing.find('.//div[@class="talalatisor-adatok"]')
+			info = adatsor.find('.//div[@class="talalatisor-info adatok"]')
+			
 			
 			title = kepsor.find('.//a').get("title")
 			url = kepsor.find('.//a').get("href")
@@ -126,12 +129,20 @@ for query in queries:
 				
 			price = adatsor.find('.//div[@class="vetelar"]').text
 			id = listing.find('.//*[@data-hirkod]').get('data-hirkod')
+			databoxes = info.findall('.//span')
+			maybeData = list(map(lambda databox: databox.text, databoxes))
+			data = " ".join(filter(lambda el: el is not None, maybeData)) + " kilométeróra állása: "
+			km = info.find('.//abbr[@title="Kilométeróra állása"]')
+			if km is not None:
+				data += km.text
+			else:
+				data += "? km"
 			
-			thiscar = car(id, title, url, price, img)
+			thiscar = car(id, title, url, price, img, data)
 			results.append(thiscar)
 			
 	for currentCar in results:
-		newdb.execute("INSERT INTO cars VALUES (?,?,?,?,?)", (currentCar.id, currentCar.title, currentCar.url, currentCar.price, currentCar.img))
+		newdb.execute("INSERT INTO cars VALUES (?,?,?,?,?,?)", (currentCar.id, currentCar.title, currentCar.url, currentCar.price, currentCar.img, currentCar.data))
 		newdb.commit()
 		
 	print("... done.")
