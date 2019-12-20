@@ -49,7 +49,7 @@ class car:
             )
         return False
 
-    def diffFromOld(self, other):
+    def diffFromOld(self, other) -> str:
         difference = ""
         if self.title != other.title:
             difference += "title changed<br>\n"

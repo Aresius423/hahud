@@ -13,14 +13,13 @@ def loadToCache(imgurl):
     if imgurl == "NotFound":
         return "../resources/notfound.png"
     extension = imgurl.split(".")[-1]
-    hash = hashlib.md5(imgurl.encode("utf-8")).hexdigest()
-    cacheFile = cachedir + hash + "." + extension
+    url_hash = hashlib.md5(imgurl.encode("utf-8")).hexdigest()
+    cacheFile = cachedir + url_hash + "." + extension
 
     if not os.path.isfile(cacheFile):
         try:
             urllib.request.urlretrieve(imgurl, cacheFile)
-        except:
-            raise
+        except Exception: # pylint: disable=broad-except
             return "../resources/notfound.png"
 
-    return "../cache/" + hash + "." + extension
+    return "../cache/" + url_hash + "." + extension

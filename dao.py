@@ -1,7 +1,7 @@
-import sqlite3
-from datamodels import *
-
 import os
+
+import sqlite3
+from datamodels import car, change
 
 
 def setupNewDB(dirpath):

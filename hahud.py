@@ -1,16 +1,14 @@
 import hashlib
 import os
 
-from cache import *
-from datamodels import *
-from htmlgenerator import *
-from hahu_processor import *
-from dao import *
-from queries import *
+from htmlgenerator import generateMenu, generateDelta
+from hahu_processor import fetch_results_from_query
+from dao import setupNewDB, insertResults, findChanges, archiveDatabase
+from queries import queries
 
 for query in queries:
-    hash = hashlib.md5(query.url.encode("utf-8")).hexdigest()[:6]
-    dirpath = os.getcwd() + "/data_" + query.name.strip() + "_" + hash
+    query_hash = hashlib.md5(query.url.encode("utf-8")).hexdigest()[:6]
+    dirpath = os.getcwd() + "/data_" + query.name.strip() + "_" + query_hash
 
     results = fetch_results_from_query(query)
 
@@ -21,11 +19,11 @@ for query in queries:
 
     changes = findChanges(dirpath, results)
 
-    if len(changes) is not 0:
+    if not changes:
         generateDelta(dirpath, changes, results)
 
     print("done. ", end="")
-    if len(changes) is not 0:
+    if not changes:
         print(str(len(changes)) + " change(s)")
     else:
         print("")

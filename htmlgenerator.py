@@ -2,9 +2,14 @@ import os
 import time
 from datetime import datetime
 
-from datamodels import *
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from datamodels import change
 from glob import glob
 
+env = Environment(
+    loader=FileSystemLoader('templates'),
+    autoescape=select_autoescape(['html', 'xml'])
+)
 
 def epoch2timestamp(ts):
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
@@ -28,15 +33,13 @@ def generateDelta(dirpath, changes, results):
                 deltaFile.write(cli)
                 fullDeltaFile.write(cli)
 
-            resultsAsChanges = list(
+            resultsAsChanges = set(
                 map(lambda simpleResult: change(simpleResult, "", ""), results)
             )
-            changeIDs = list(
+            changeIDs = set(
                 map(lambda alreadyWrittenChange: alreadyWrittenChange.car.id, changes)
             )
-            filteredResults = filter(
-                lambda r: r.car.id not in changeIDs, resultsAsChanges
-            )
+            filteredResults = resultsAsChanges - changeIDs
 
             for fres in filteredResults:
                 fullDeltaFile.write(fres.toListItem(listTemplate))
@@ -54,10 +57,10 @@ def generateMenu():
         if not line.startswith("%MENUITEMS%"):
             menuFile.write(line)
         else:
-            for dir in dirs:
-                menuFile.write("<li>" + dir.split("data_")[-1][:-1] + "\n<ul>\n")
+            for directory in dirs:
+                menuFile.write("<li>" + directory.split("data_")[-1][:-1] + "\n<ul>\n")
 
-                allhtmls = glob(dir + "*.html")[::-1]
+                allhtmls = glob(directory + "*.html")[::-1]
                 htmls = sorted(filter(lambda h: not h.endswith("full.html"), allhtmls))
 
                 nonAbsolute = list(
