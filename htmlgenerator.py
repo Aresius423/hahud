@@ -1,6 +1,8 @@
 import os
 import time
 from datetime import datetime
+from dataclasses import dataclass
+from typing import List
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from datamodels import change
@@ -10,6 +12,7 @@ env = Environment(
     loader=FileSystemLoader('templates'),
     autoescape=select_autoescape(['html', 'xml'])
 )
+menu_template = env.get_template('menu.html')
 
 def epoch2timestamp(ts):
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
@@ -48,43 +51,41 @@ def generateDelta(dirpath, changes, results):
     fullDeltaFile.close()
 
 
-def generateMenu():
-    menuTemplateFile = open(os.getcwd() + "/templates/menu_template")
-    menuFile = open(os.getcwd() + "/menu.html", "w+", encoding="utf-8")
+@dataclass
+class ChangeSet:
+    def __init__(self, file_path: str) -> None:
+        self.delta_path = file_path
+        self.full_path = f'{file_path[:-5]}.full.html'
+        self.link_text = epoch2timestamp(
+            float(file_path[file_path.find("data_") :].split("/")[-1][:-5])
+        )
+
+
+@dataclass
+class MenuItem:
+    query: str
+    htmls: List[ChangeSet]
+
+
+def get_menu_items() -> List[MenuItem]:
     dirs = glob(os.getcwd() + "/data_*/")
+    menu_items: List[MenuItem] = []
+    for directory in dirs:
+        query_name = directory.split("data_")[-1][:-1]
 
-    for line in menuTemplateFile:
-        if not line.startswith("%MENUITEMS%"):
-            menuFile.write(line)
-        else:
-            for directory in dirs:
-                menuFile.write("<li>" + directory.split("data_")[-1][:-1] + "\n<ul>\n")
+        allhtmls = glob(directory + "*.html")[::-1]
+        htmls = sorted(filter(lambda h: not h.endswith("full.html"), allhtmls))
+        htmls_with_rel_path = map(lambda abs: "/".join(abs.split("\\")[-2:]), htmls)
+        change_sets: List[ChangeSet] = list(map(ChangeSet, htmls_with_rel_path))
+        menu_items.append(MenuItem(query_name, change_sets))
 
-                allhtmls = glob(directory + "*.html")[::-1]
-                htmls = sorted(filter(lambda h: not h.endswith("full.html"), allhtmls))
+    return menu_items
 
-                nonAbsolute = list(
-                    map(lambda abs: "/".join(abs.split("\\")[-2:]), htmls)
-                )
-                links = list(
-                    map(
-                        lambda pth: '<li><a href="'
-                        + pth[pth.find("data_") :]
-                        + '" target="main">'
-                        + epoch2timestamp(
-                            float(pth[pth.find("data_") :].split("/")[-1][:-5])
-                        )
-                        + '</a> <a href ="'
-                        + pth[:-5]
-                        + '.full.html" target="main">Δ</a>\n',
-                        nonAbsolute,
-                    )
-                )
 
-                for link in links:
-                    menuFile.write(link)
+def generateMenu():
+    menu_items = get_menu_items()
 
-                menuFile.write("</li>\n</ul>\n")
-
-    menuTemplateFile.close()
-    menuFile.close()
+    with open(os.getcwd() + "/menu.html", "w+", encoding="utf-8") as menu_file:
+        menu_file.write(
+            menu_template.render(menu_items=menu_items)
+        )
