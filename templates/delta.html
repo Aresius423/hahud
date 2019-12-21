@@ -1,0 +1,34 @@
+<html>
+<head>
+    <link rel="stylesheet" href="../resources/css/bootstrap.css">
+    <link rel="stylesheet" href="../resources/css/simpletree.css">
+    <link rel="stylesheet" href="../resources/css/hahud.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+    {% for listing in changes %}
+        <div class="container change m-4 border border-primary">
+            <div class="row px-1 item-header">
+                <div class="col listing-reason">{{ listing.reason }}</div>
+                <div class="col-6 listing-title"><a href="{{ listing.url }}" target="_blank" rel="noref noopener">{{ listing.title }}</a></div>
+                <div class="col listing-price">{{ listing.price }}</div>
+            </div>
+            <div class="row px1-1">
+                <div class="col text-center listing-image"><img src="{{ listing.img }}"></div>
+                <div class="col">
+                    <div class="container">
+                        <div class="row listing-id">ID: {{ listing.listing_id }}</div>
+                        <div class="row listing-data">{{ listing.data }}</div>
+                        {% if listing.detailed_reason %}
+                            <div class="row listing-detailed-reason">{{ listing.detailed_reason }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+<script src="../resources/js/jquery-3.4.1.js"></script>
+<script src="../resources/js/bootstrap.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import List
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from datamodels import change
+from datamodels import car
 from glob import glob
 
 env = Environment(
@@ -13,42 +13,20 @@ env = Environment(
     autoescape=select_autoescape(['html', 'xml'])
 )
 menu_template = env.get_template('menu.html')
+delta_template = env.get_template('delta.html')
 
 def epoch2timestamp(ts):
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def generateDelta(dirpath, changes, results):
-    templateFile = open(os.getcwd() + "/templates/delta_template")
-    listTemplateFile = open(os.getcwd() + "/templates/listing_template")
-    listTemplate = listTemplateFile.read()
+def generateDelta(dirpath: str, changes: List[car], results: List[car]):
     dfilename = dirpath + "/" + str(time.time()) + ".html"
-    deltaFile = open(dfilename, "w+", encoding="utf-8")
-    fullDeltaFile = open(dfilename[:-5] + ".full.html", "w+", encoding="utf-8")
 
-    for line in templateFile:
-        if not line.startswith("%DELTA%"):
-            fullDeltaFile.write(line)
-            deltaFile.write(line)
-        else:
-            for thisChange in changes:
-                cli = thisChange.toListItem(listTemplate)
-                deltaFile.write(cli)
-                fullDeltaFile.write(cli)
+    with open(dfilename[:-5] + ".full.html", "w+", encoding="utf-8") as full_delta_file:
+        full_delta_file.write(delta_template.render(changes=results))
 
-            resultsAsChanges = set(
-                map(lambda simpleResult: change(simpleResult, "", ""), results)
-            )
-            changeIDs = set(
-                map(lambda alreadyWrittenChange: alreadyWrittenChange.car.id, changes)
-            )
-            filteredResults = resultsAsChanges - changeIDs
-
-            for fres in filteredResults:
-                fullDeltaFile.write(fres.toListItem(listTemplate))
-
-    templateFile.close()
-    fullDeltaFile.close()
+    with open(dfilename, 'w+', encoding='utf-8') as delta_file:
+        delta_file.write(delta_template.render(changes=changes))
 
 
 @dataclass

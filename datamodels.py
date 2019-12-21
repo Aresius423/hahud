@@ -1,46 +1,31 @@
+from dataclasses import dataclass
+from typing import Optional
+
 class query:
     def __init__(self, name, url):
         self.name = name
         self.url = url
 
-
-class change:
-    def __init__(self, car, summary, reason):
-        self.car = car
-        self.summary = summary
-        self.reason = reason
-
-    def __str__(self):
-        return f'{self.reason}\n{str(self.car)}'
-
-    def toListItem(self, template):
-        filled = template.replace("%LISTING_REASON%", self.summary)
-        filled = filled.replace("%LISTING_ID%", self.car.id)
-        filled = filled.replace("%LISTING_PRICE%", self.car.price)
-        filled = filled.replace("%LISTING_LINK%", self.car.url)
-        filled = filled.replace("%LISTING_TITLE%", self.car.title)
-        filled = filled.replace("%LISTING_IMAGE%", self.car.img)
-        filled = filled.replace("%DETAILED_REASON%", self.reason)
-        filled = filled.replace("%LISTING_DATA%", self.car.data)
-        return filled
-
-
+@dataclass
 class car:
-    def __init__(self, id, title, url, price, img, data):
-        self.id = id
-        self.title = title
-        self.url = url
-        self.price = str(price.replace("\xa0", "&nbsp;"))
-        self.img = img
-        self.data = data
+    listing_id: str
+    title: str
+    url: str
+    price: str
+    img: str
+    data: str
+    reason: Optional[str] = None
+    detailed_reason: Optional[str] = None
 
-    def __str__(self):
-        return '\n'.join([self.id, self.title, self.price, '___________'])
+
+    def __post_init__(self):
+        self.price = self.price.replace("\xa0", " ")
+
 
     def __eq__(self, other):
         if isinstance(other, car):
             return (
-                self.id == other.id
+                self.listing_id == other.listing_id
                 and self.title == other.title
                 and self.url == other.url
                 and self.price == other.price
@@ -48,6 +33,19 @@ class car:
                 and self.data == other.data
             )
         return False
+
+
+    def with_change_reasons(self, reason: str, detailed_reason: Optional[str] = None) -> 'car':
+        return car(self.listing_id,
+                   self.title,
+                   self.url,
+                   self.price,
+                   self.img,
+                   self.data,
+                   reason,
+                   detailed_reason,
+                  )
+
 
     def diffFromOld(self, other) -> str:
         difference = ""

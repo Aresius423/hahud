@@ -1,8 +1,8 @@
 var persisteduls=new Object()
 var ddtreemenu=new Object()
 
-ddtreemenu.closefolder="resources/closed.gif" //set image path to "closed" folder image
-ddtreemenu.openfolder="resources/open.gif" //set image path to "open" folder image
+ddtreemenu.closefolder="resources/images/closed.gif" //set image path to "closed" folder image
+ddtreemenu.openfolder="resources/images/open.gif" //set image path to "open" folder image
 
 //////////No need to edit beyond here///////////////////////////
 

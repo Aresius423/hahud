@@ -1,7 +1,9 @@
 import os
+from typing import List
 
 import sqlite3
-from datamodels import car, change
+
+from datamodels import car
 
 
 def setupNewDB(dirpath):
@@ -29,37 +31,40 @@ def insertResults(db, results):
     for res in results:
         db.execute(
             "INSERT INTO cars VALUES (?,?,?,?,?,?)",
-            (res.id, res.title, res.url, res.price, res.img, res.data),
+            (res.listing_id, res.title, res.url, res.price, res.img, res.data),
         )
         db.commit()
 
 
-def findChanges(dirpath, results):
+def findChanges(dirpath, results: List[car]) -> List[car]:
     changes = []
-    newIDs = list(map(lambda newresult: newresult.id, results))
+    newIDs = list(map(lambda newresult: newresult.listing_id, results))
 
     if not os.path.isfile(dirpath + "/data.db"):
-        changes = list(map(lambda item: change(item, "new", ""), results))
+        changes = list(map(lambda item: item.with_change_reasons("new"), results))
     else:
         olddb = sqlite3.connect(dirpath + "/data.db")
         for currentCar in results:
             oldres = olddb.execute(
-                "SELECT * from cars WHERE id=?", [currentCar.id]
+                "SELECT * from cars WHERE id=?", [currentCar.listing_id]
             ).fetchone()
             if oldres is not None:
                 oldcar = car(*oldres)
                 if oldcar != currentCar:
                     changes.append(
-                        change(currentCar, "changed", currentCar.diffFromOld(oldcar))
+                        currentCar.with_change_reasons(
+                            'changed',
+                            currentCar.diffFromOld(oldcar),
+                        )
                     )
             else:
-                changes.append(change(currentCar, "new", ""))
+                changes.append(currentCar.with_change_reasons('new'))
 
         oldCarData = olddb.execute("SELECT * from cars").fetchall()
-        oldCars = list(map(lambda tuple: car(*tuple), oldCarData))
+        oldCars = list(map(lambda tpl: car(*tpl), oldCarData))
         for oldCar in oldCars:
-            if oldCar.id not in newIDs:
-                changes.append(change(oldCar, "deleted", "deleted"))
+            if oldCar.listing_id not in newIDs:
+                changes.append(oldCar.with_change_reasons("deleted"))
 
         olddb.close()
 

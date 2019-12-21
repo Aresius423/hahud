@@ -1,7 +1,8 @@
-import requests
 from lxml import html
 from lxml import etree
 from lxml.etree import tostring
+import requests
+from typing import List
 
 from cache import loadToCache
 from datamodels import car
@@ -15,7 +16,7 @@ def page(num, base):
     return base + "/page" + str(num)
 
 
-def fetch_results_from_query(query):
+def fetch_results_from_query(query) -> List[car]:
     initReq = requests.get(query.url, headers=header)
     initTree = html.fromstring(initReq.content)
 
@@ -26,7 +27,7 @@ def fetch_results_from_query(query):
     except IndexError:
         num_of_pages = 1
 
-    results = []
+    results: List[car] = []
 
     for pagenum in range(1, num_of_pages + 1):
         print(f"\rProcessing page {str(pagenum)} out of {str(num_of_pages)} for query {query.name}", end="")

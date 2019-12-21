@@ -1,0 +1,9 @@
+.listing-image>img {
+    width: 118px;
+    height: 88px;
+    margin: 1em auto;
+}
+
+.item-header {
+    background-color: #c0c0c0;
+}
