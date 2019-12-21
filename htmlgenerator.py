@@ -46,15 +46,14 @@ class MenuItem:
 
 
 def get_menu_items() -> List[MenuItem]:
-    dirs = glob(os.getcwd() + "/data_*/")
+    dirs = glob("data_*/")
     menu_items: List[MenuItem] = []
     for directory in dirs:
         query_name = directory.split("data_")[-1][:-1]
 
         allhtmls = glob(directory + "*.html")[::-1]
         htmls = sorted(filter(lambda h: not h.endswith("full.html"), allhtmls))
-        htmls_with_rel_path = map(lambda abs: "/".join(abs.split("\\")[-2:]), htmls)
-        change_sets: List[ChangeSet] = list(map(ChangeSet, htmls_with_rel_path))
+        change_sets: List[ChangeSet] = list(map(ChangeSet, htmls))
         menu_items.append(MenuItem(query_name, change_sets))
 
     return menu_items
