@@ -11,7 +11,7 @@ class change:
         self.reason = reason
 
     def __str__(self):
-        return self.reason + "\n" + str(self.car)
+        return f'{self.reason}\n{str(self.car)}'
 
     def toListItem(self, template):
         filled = template.replace("%LISTING_REASON%", self.summary)
@@ -35,7 +35,7 @@ class car:
         self.data = data
 
     def __str__(self):
-        return self.id + "\n" + self.title + "\n" + self.price + "\n___________"
+        return '\n'.join([self.id, self.title, self.price, '___________'])
 
     def __eq__(self, other):
         if isinstance(other, car):
@@ -54,9 +54,9 @@ class car:
         if self.title != other.title:
             difference += "title changed<br>\n"
         if self.price != other.price:
-            difference += "price changed from " + other.price + "<br>\n"
+            difference += f"price changed from {other.price} <br>\n"
         if self.img != other.img:
             difference += "image changed<br>\n"
         if self.data != other.data:
-            difference += "data changed from: " + other.data + "<br>\n"
+            difference += "data changed from: {other.data} <br>\n"
         return difference

@@ -29,15 +29,7 @@ def fetch_results_from_query(query):
     results = []
 
     for pagenum in range(1, num_of_pages + 1):
-        print(
-            "\rProcessing page "
-            + str(pagenum)
-            + " out of "
-            + str(num_of_pages)
-            + " for query "
-            + query.name,
-            end="",
-        )
+        print(f"\rProcessing page {str(pagenum)} out of {str(num_of_pages)} for query {query.name}", end="")
         request = requests.get(page(pagenum, query.url))
         tree = html.fromstring(request.content)
         listings = tree.xpath('.//div[contains(@class, "row talalati-sor")]')

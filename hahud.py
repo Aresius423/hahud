@@ -19,11 +19,11 @@ for query in queries:
 
     changes = findChanges(dirpath, results)
 
-    if not changes:
+    if changes:
         generateDelta(dirpath, changes, results)
 
     print("done. ", end="")
-    if not changes:
+    if changes:
         print(str(len(changes)) + " change(s)")
     else:
         print("")
