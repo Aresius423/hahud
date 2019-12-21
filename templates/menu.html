@@ -1,0 +1,39 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--
+    /***********************************************
+* Simple Tree Menu- (c) Dynamic Drive DHTML code library (www.dynamicdrive.com)
+* Please keep this notice intact
+* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code
+***********************************************/ -->
+<link rel="stylesheet" type="text/css" href="resources/css/simpletree.css" />
+</head>
+
+<body>
+
+<a href="javascript:ddtreemenu.flatten('treemenu1', 'expand')">Expand All</a> | <a href="javascript:ddtreemenu.flatten('treemenu1', 'contact')">Close</a>
+
+<ul id="treemenu1" class="treeview">
+    {% for menu_item in menu_items %}
+        <li>{{ menu_item.query }}
+            <ul>
+                {% for link in menu_item.htmls %}
+                <li>
+                    <a href="{{ link.delta_path }}" target="main">{{ link.link_text }}</a>
+                    <a href="{{ link.full_path }}" target="main">Δ</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+</ul>
+
+<script type="text/javascript" src="resources/js/simpletreemenu.js"></script>
+<script type="text/javascript">
+ddtreemenu.createTree("treemenu1", true)
+ddtreemenu.flatten('treemenu1', 'expand')
+</script>
+
+</body>
+</html>

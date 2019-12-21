@@ -1,6 +1,6 @@
 cache/
 data_*/
-menu.html
+/menu.html
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
