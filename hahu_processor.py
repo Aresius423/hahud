@@ -44,8 +44,8 @@ def fetch_results_from_query(query) -> List[car]:
             url = kepsor.find(".//a").get("href")
 
             try:
-                img = kepsor.find('.//img[@class="img-responsive lazy"]').get(
-                    "data-lazyurl"
+                img = kepsor.find('.//img[@class="img-responsive"]').get(
+                    "src"
                 )
             except AttributeError:
                 img = "NotFound"
