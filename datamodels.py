@@ -48,7 +48,7 @@ class car:
 
 
     def diffFromOld(self, other) -> str:
-        difference = ""
+        difference = "<p>"
         if self.title != other.title:
             difference += "title changed<br>\n"
         if self.price != other.price:
@@ -56,5 +56,6 @@ class car:
         if self.img != other.img:
             difference += "image changed<br>\n"
         if self.data != other.data:
-            difference += "data changed from: {other.data} <br>\n"
+            difference += f"data changed from: {other.data} <br>\n"
+        difference += "</p>"
         return difference
