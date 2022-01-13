@@ -20,7 +20,7 @@
                         <div class="row listing-id">ID: {{ listing.listing_id }}</div>
                         <div class="row listing-data">{{ listing.data }}</div>
                         {% if listing.detailed_reason %}
-                            <div class="row listing-detailed-reason">{{ listing.detailed_reason }}</div>
+                            <div class="row listing-detailed-reason">{{ listing.detailed_reason | safe }}</div>
                         {% endif %}
                     </div>
                 </div>
